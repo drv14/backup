@@ -5,59 +5,88 @@ using UnityEngine.Windows.Speech;
 
 public class VoiceManager : MonoBehaviour {
 
-	//Internal reference to a keywordRecognizer.
-	KeywordRecognizer krZero;
-    KeywordRecognizer krFifty;
-
-    //Reference the CubeSpinner which we will change.
+    //Internal reference to a keywordRecognizer.
     public bool toContinue = false;
-    private string[] zero = new string[50];
-    private string[] fifty = new string[51];
+    private string response;
+    private string[] oneToOneHundred = new string[102];
+    private KeywordRecognizer kr;
+    AudioSource auSo;
+    public DataStorage ds;
+    public WaitForSeconds ten = new WaitForSeconds(10f);
 
-	// Use this for initialization
-	void Start () {
-        createString();
+    // Use this for initialization
+    void Start () {
+         auSo = GetComponent<AudioSource>();
+
+        CreateString();
 
 		//Create a new keywordRecognizer, with the words from one to one hundred
-		krZero = new KeywordRecognizer(zero);
+		kr = new KeywordRecognizer(oneToOneHundred);
 
-        krFifty = new KeywordRecognizer(fifty);
-
-        
-
-		//Register OnVoiceCommandBelow to krZero's onPhraseRecognized
-		krZero.OnPhraseRecognized += OnVoiceCommandBelow;
-
-		//Start listening for gestures.
-		krZero.Start();
-
-        //Register OnVoiceCommandAbove to krFifty's onPhraseRecognized
-        krFifty.OnPhraseRecognized += OnVoiceCommandAbove;
-
-        //Start listening for gestures.
-        krFifty.Start();
+		//Register OnVoiceCommand to kr's onPhraseRecognized
+		kr.OnPhraseRecognized += OnVoiceCommand;
+    }
+    public IEnumerator StartListening()
+    {
+        kr.Start();
+        yield return ten;
+        kr.Stop();
     }
 
-	private void OnVoiceCommandBelow(PhraseRecognizedEventArgs args)
+    //when a keyword is recognized
+	private void OnVoiceCommand(PhraseRecognizedEventArgs args)
 	{
-        toContinue = false;
+        if (!args.text.Equals("try again"))
+        {
+            //add the responses to the directory
+            MoveOn(args.text);
+            
+        }
+        else
+        //keyword was "try again", so we wait for a new response
+        {
+            auSo.Play();
+            StartCoroutine(StartListening());
+        }
+            
 	}
-
-    private void OnVoiceCommandAbove(PhraseRecognizedEventArgs args)
+    /// <summary>
+    /// adds repsonse to directory and compares it to previous ratings to see if user is ready to move on
+    /// </summary>
+    /// <param name="response"></param>
+    private void MoveOn(string response)
     {
-        toContinue = true;
+        //check anxiety rating... 
+        //compare anxiety rating to highest datapoint that has existed
+        //if the newest anxiety rating is higher, update it, if it is some % lower, consider it to have peaked
+        //set toContinue to true
+        ds.Add(response);
+        if (ds.IsPeaked(response))
+        {
+            toContinue = true;
+        }
+
+
     }
 
-    private void createString()
+    //creates an array of strings that has the numbers "one" to "one-hundred"
+    private void CreateString()
     {
-        for (int i = 0; i < zero.Length; i++)
+        for (int i = 0; i < oneToOneHundred.Length - 2; i++)
         {
-            zero[i] = i.ToString();
+            oneToOneHundred[i] = i.ToString();
         }
-        for (int j = 50; j < fifty.Length + 50; j++)
-        {
-            fifty[j - 50] = j.ToString();
-        }
-
+        //it doesn't currently deal with the "try again" situation, I guess I can just add it to the end of the oneToOnehundredArray..
+        oneToOneHundred[oneToOneHundred.Length - 2] = "try again";
+        oneToOneHundred[oneToOneHundred.Length - 1] = "main menu";
     }
+
+
+    private void showList()
+    {
+        //put responseDirectory on the screen for the psychologist to record.
+        //modify a agmeobject with dont destroy onload to store all data and display it in a new scene
+        //load new scene
+    }
+
 }
