@@ -6,6 +6,7 @@ public class SpatialMapping : MonoBehaviour
 {
     public static SpatialMapping Instance { private set; get; }
     public static int PhysicsRaycastMask;
+    public GameObject placeholder;
 
     [Tooltip("The material to use when rendering Spatial Mapping data.")]
     public Material DrawMaterial;
@@ -121,6 +122,17 @@ public class SpatialMapping : MonoBehaviour
                 SurfaceData smsd = surfaceDataQueue.Dequeue();
                 surfaceWorkOutstanding = Observer.RequestMeshAsync(smsd, Observer_OnDataReady);
             }
+        }
+        //I added this in to turn off visualmeshes
+        if (placeholder.GetComponent<TapToPlaceParent>().firstPass == false)
+        {
+            foreach (GameObject surface in surfaces.Values)
+            {
+                GameObject.Destroy(surface);
+                //surface.GetComponent<MeshRenderer>().enabled = false;
+            }
+            surfaces.Clear();
+            this.gameObject.SetActive(false);
         }
     }
 
