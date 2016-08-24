@@ -12,7 +12,7 @@ public class VoiceManager : MonoBehaviour {
     private KeywordRecognizer kr;
     AudioSource auSo;
     public DataStorage ds;
-    public WaitForSeconds ten = new WaitForSeconds(10f);
+    public WaitForSeconds fifteen = new WaitForSeconds(15f);
 
     // Use this for initialization
     void Start () {
@@ -26,10 +26,22 @@ public class VoiceManager : MonoBehaviour {
 		//Register OnVoiceCommand to kr's onPhraseRecognized
 		kr.OnPhraseRecognized += OnVoiceCommand;
     }
-    public IEnumerator StartListening()
+    /// <summary>
+    /// starts coroutine so it can be called from another class
+    /// </summary>
+    public void StartListening()
+    {
+        StartCoroutine(OnStartListening());
+    }
+
+    /// <summary>
+    /// listen for ten seconds
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator OnStartListening()
     {
         kr.Start();
-        yield return ten;
+        yield return fifteen;
         kr.Stop();
     }
 
@@ -40,18 +52,18 @@ public class VoiceManager : MonoBehaviour {
         {
             //add the responses to the directory
             MoveOn(args.text);
-            
         }
         else
         //keyword was "try again", so we wait for a new response
         {
             auSo.Play();
-            StartCoroutine(StartListening());
+            StartCoroutine(OnStartListening());
         }
             
 	}
+
     /// <summary>
-    /// adds repsonse to directory and compares it to previous ratings to see if user is ready to move on
+    /// adds repsonse to directory and compares it to previous ratings to see if user is ready to move on called by OnVoiceCommand
     /// </summary>
     /// <param name="response"></param>
     private void MoveOn(string response)
@@ -69,7 +81,9 @@ public class VoiceManager : MonoBehaviour {
 
     }
 
-    //creates an array of strings that has the numbers "one" to "one-hundred"
+    /// <summary>
+    /// creates an array of strings that has the numbers "one" to "one-hundred"
+    /// </summary>
     private void CreateString()
     {
         for (int i = 0; i < oneToOneHundred.Length - 2; i++)

@@ -71,8 +71,8 @@ public class GameManager : MonoBehaviour {
         while (true)
         {
             //every minute we ask for anxiety rating
-            if (isAnythingPlaying(anxietyRating))
-                StartCoroutine(vm.StartListening());
+            if (!isAnythingPlaying(anxietyRating))
+                vm.StartListening();
             yield return thirty;
             messageCounter += 30f;
             //every other 30 seconds we play a recording

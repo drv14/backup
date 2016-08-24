@@ -89,7 +89,6 @@ public class WandMouse : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        //if(shouldWander)
         wander();
         WallForce();
         RotateToVelocity(100f);
@@ -104,7 +103,8 @@ public class WandMouse : MonoBehaviour
         drawCircle();         
         forceToAdd = drawWanderForce();             //sets the force to be of the correct magnitude and in the direction of the wander angle
         forceToAdd.y = 0;
-        rb.AddForce(forceToAdd * 2f);               //adds the force
+        rb.AddForce(forceToAdd * 3f);               //adds the force
+
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public class WandMouse : MonoBehaviour
         {
             //if isIdle is true then the animation would not play > anim.speed set to 0 becaute there is no velocity
             if (anim.GetBool("isIdle") == false)
-                anim.speed = rb.velocity.magnitude * 10;
+                anim.speed = rb.velocity.magnitude * 9;
             //these variables are from RotateToVelocity
             float target = dirQ.eulerAngles.y;
             float current = slerp.eulerAngles.y;
@@ -136,14 +136,16 @@ public class WandMouse : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds the secondary wall force
+    /// Adds the secondary wall force,
+    /// used by fixedupdate,
+    /// counter is set in "adjustwallforce"
     /// </summary>
     void WallForce()
     {
-        rb.AddForce(-counter1);
-        rb.AddForce(-counter2);
-        rb.AddForce(-counter3);
-        rb.AddForce(-counter4);
+        rb.AddForce(counter1);
+        rb.AddForce(counter2);
+        rb.AddForce(counter3);
+        rb.AddForce(counter4);
     }
 
     /// <summary>
@@ -197,7 +199,8 @@ public class WandMouse : MonoBehaviour
     }
 
     /// <summary>
-    /// add forces from walls
+    /// add forces from walls,
+    /// sets checkForStall used in rorateToVelocity
     /// </summary>
     /// <returns></returns>
     IEnumerator AdjustWallForce()
@@ -224,10 +227,11 @@ public class WandMouse : MonoBehaviour
 
 
             // (constant/ distance to target) = magnitude * (direction based on wall number) = vector from each wall
-            counter1 = (.05f / distanceToTarget1) * addCounterForce(1);
-            counter2 = (.05f / distanceToTarget2) * addCounterForce(2);
-            counter3 = (.05f / distanceToTarget3) * addCounterForce(3);
-            counter4 = (.05f / distanceToTarget4) * addCounterForce(4);
+            counter1 = (.05f / distanceToTarget1) * wall1.transform.forward;
+            counter2 = (.05f / distanceToTarget2) * wall2.transform.forward;
+            counter3 = (.05f / distanceToTarget3) * wall3.transform.forward;
+            counter4 = (.05f / distanceToTarget4) * wall4.transform.forward;
+
 
             // change the counterForce once every second
             yield return pointOne;
@@ -235,26 +239,6 @@ public class WandMouse : MonoBehaviour
 
 
         }
-    }
-
-    /// <summary>
-    /// sets the appropriate force direction 
-    /// </summary>
-    /// <param name="wallNum"></param>
-    /// <returns></returns>
-    Vector3 addCounterForce(int wallNum)
-    {
-        //we will make a force opposite to the wallnumber (getWN) that the counterForce object has
-        if (wallNum == 1)
-            return new Vector3(1, 0, 0);
-        else if (wallNum == 2)
-            return new Vector3(-1, 0, 0);
-        else if (wallNum == 3)
-            return new Vector3(0, 0, 1);
-        else if (wallNum == 4)
-            return new Vector3(0, 0, -1);
-        else //should not happen
-            return new Vector3(0, 1, 0);
     }
 
     /// <summary>
